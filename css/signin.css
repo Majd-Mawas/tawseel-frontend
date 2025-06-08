@@ -1,5 +1,7 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 html {
   height: 100%;
@@ -12,10 +14,18 @@ body {
   box-sizing: border-box;
   background-size: 100% 100%;
 }
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .signin-form {
-  margin: auto;
+  /* margin: auto; */
   backdrop-filter: blur(40px);
-  margin-top: 70px;
+  /* margin-top: 70px; */
   max-width: 420px;
   width: 100%;
   padding: 40px;
@@ -23,6 +33,10 @@ body {
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.39);
   animation: fadeIn 1.5s ease-out;
+}
+
+.submit {
+  margin-top: 1rem;
 }
 
 .form-heading {

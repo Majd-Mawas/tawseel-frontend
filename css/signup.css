@@ -1,5 +1,7 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
@@ -12,11 +14,12 @@ body {
     url("/assets/images/photo_1_2025-05-09_15-38-16.jpg");
   box-sizing: border-box;
   background-size: 100% 100%;
+  padding-top: 30px;
 }
 .signup-form {
   margin: auto;
   backdrop-filter: blur(40px);
-  margin-top: 70px;
+  /* margin-top: 70px; */
   max-width: 420px;
   width: 100%;
   padding: 40px;

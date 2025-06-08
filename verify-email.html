@@ -1,50 +1,71 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Email Verification - Tawseel</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='css/signin.css'>
-    <script>
-        async function verifyCode(event) {
-            event.preventDefault();
-            const code = document.getElementById('verificationCode').value;
-            const email = localStorage.getItem('verificationEmail');
-
-            try {
-                // const response = await fetch('https://tawseel.circleteams.com/api/verify-email', {
-                const response = await fetch('http://tawseel.test/api/verify-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, code })
-                });
-
-                if (response.ok) {
-                    window.location.href = 'verification-success.html';
-                } else {
-                    alert('Invalid verification code. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred during verification.');
-            }
-        }
-    </script>
-</head>
-<body>
-    <form class="signin-form" onsubmit="verifyCode(event)">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="css/signin.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <form class="signin-form" onsubmit="verifyCode(event)">
         <div class="form-heading">Email Verification</div>
-        <p style="text-align: center; color: #666; margin-bottom: 20px;">
-            Please enter the verification code sent to your email
+        <p style="text-align: center; color: #666; margin-bottom: 20px">
+          Please enter the verification code sent to your email
         </p>
         <div class="input-group">
-            <label class="label" for="verificationCode">Verification Code</label>
-            <input required placeholder="Enter verification code" name="verificationCode" id="verificationCode" type="text" />
+          <label class="label" for="verificationCode">Verification Code</label>
+          <input
+            required
+            placeholder="Enter verification code"
+            name="verificationCode"
+            id="verificationCode"
+            type="text"
+          />
         </div>
         <button class="submit" type="submit">Verify Email</button>
-    </form>
-</body>
+      </form>
+    </div>
+    <script>
+      async function verifyCode(event) {
+        event.preventDefault();
+        const code = document.getElementById("verificationCode").value;
+        const email = localStorage.getItem("verificationEmail");
+
+        try {
+          // const response = await fetch('https://tawseel.circleteams.com/api/verify-email', {
+          const response = await fetch("http://tawseel.test/api/verify-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, code }),
+          });
+
+          if (response.ok) {
+            const DataResponse = await response.json();
+
+            if (DataResponse.data.token) {
+              console.log("Response data:", DataResponse.data);
+              localStorage.setItem("token", DataResponse.data.token);
+              window.location.href = "verification-success.html";
+            } else {
+              alert("Invalid verification code. Please try again.");
+            }
+          } else {
+            alert("An error occurred during verification.");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("An error occurred during verification.");
+        }
+      }
+    </script>
+  </body>
 </html>
