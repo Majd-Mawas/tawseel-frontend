@@ -1,0 +1,214 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: linear-gradient(rgba(0, 0, 0, 0.575), rgba(0, 0, 0, 0.948)),
+    url("/assets/images/Burger.jfif");
+  box-sizing: border-box;
+  background-size: 100% 100%;
+}
+
+/*first page*/
+#first_page {
+  margin-top: 300px;
+}
+.logo {
+  color: #fff;
+  font-family: "Yesteryear", cursive;
+  font-size: 40px;
+  border: 4px solid #bf6a08;
+  border-radius: 50%;
+  width: 150px;
+  text-align: center;
+  height: 150px;
+  padding: 35px 20px;
+  margin: auto;
+
+  background-color: #0000006a;
+}
+
+.logo::first-letter {
+  color: #bf6a08;
+}
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.loading-bar-background {
+  --height: 24px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 200px;
+  height: var(--height);
+  background-color: #1f1d1d;
+  box-shadow: #000000be -2px 2px 4px 0px inset;
+  border-radius: calc(var(--height) / 2);
+}
+
+.loading-bar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  --height: 20px;
+  width: 0%;
+  height: var(--height);
+  overflow: hidden;
+  background: rgb(222, 74, 15);
+  background: linear-gradient(0deg, #bf6a08 0%, rgba(249, 199, 79, 1) 100%);
+  border-radius: calc(var(--height) / 2);
+  animation: loading 4s ease-out infinite;
+}
+
+.white-bars-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.white-bar {
+  background: rgb(255, 255, 255);
+  background: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  width: 10px;
+  height: 45px;
+  opacity: 0.3;
+  rotate: 45deg;
+}
+
+@keyframes loading {
+  0% {
+    width: 0;
+  }
+
+  80% {
+    width: 100%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.para {
+  color: white;
+  font-weight: bold;
+  font-size: 25px;
+  text-align: center;
+  text-shadow: #000000 2px -1px 1px;
+}
+
+/*second page*/
+#second_page {
+  margin-top: 200px;
+}
+.logo {
+  color: #fff;
+  font-family: "Yesteryear", cursive;
+  font-size: 40px;
+  border: 4px solid #bf6a08;
+  border-radius: 50%;
+  width: 150px;
+  text-align: center;
+  height: 150px;
+  padding: 35px 20px;
+  margin: auto;
+
+  background-color: #0000006a;
+}
+
+.logo::first-letter {
+  color: #bf6a08;
+}
+.c-button--gooey {
+  color: #000;
+  font-size: 16px;
+  text-decoration: none;
+  padding: 0.9em 3.6em;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  z-index: 1;
+  color: #bf6a08;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border: 4px solid black;
+  border-radius: 9px;
+  position: relative;
+  transition: all 700ms ease;
+  left: 42.5vw;
+}
+
+.c-button--gooey .c-button__blobs {
+  height: 100%;
+  filter: url(#goo);
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: -3px;
+  right: -1px;
+  z-index: -1;
+}
+
+.c-button--gooey .c-button__blobs div {
+  background-color: #000000;
+  width: 34%;
+  height: 100%;
+  border-radius: 100%;
+  position: absolute;
+  transform: scale(1.4) translateY(125%) translateZ(0);
+  transition: all 700ms ease;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(1) {
+  left: -5%;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(2) {
+  left: 30%;
+  transition-delay: 24ms;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(3) {
+  left: 66%;
+  transition-delay: 30ms;
+}
+
+.c-button--gooey:hover {
+  color: #bf6a08;
+}
+
+.c-button--gooey:hover .c-button__blobs div {
+  transform: scale(1.4) translateY(0) translateZ(0);
+}
+.buttons {
+  margin-top: 50px;
+}
