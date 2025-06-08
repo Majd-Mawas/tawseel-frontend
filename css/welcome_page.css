@@ -11,7 +11,7 @@ html {
 
 body {
   background: linear-gradient(rgba(0, 0, 0, 0.575), rgba(0, 0, 0, 0.948)),
-    url("/assets/images/Burger.jfif");
+    url("../assets/images/Burger.jfif");
   box-sizing: border-box;
   background-size: 100% 100%;
 }
