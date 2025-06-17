@@ -148,6 +148,7 @@
             if (DataResponse.data.token) {
               console.log("Response data:", DataResponse.data);
               localStorage.setItem("token", DataResponse.data.token);
+              localStorage.setItem("email", DataResponse.data.user.email);
               window.location.href = "verify-email.html";
             }
           } else {
