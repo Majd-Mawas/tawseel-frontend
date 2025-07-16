@@ -37,13 +37,13 @@
         <a href="index.html" class="button">log out</a>
       </nav>
 
-      <div class="header-p">
+      <!-- <div class="header-p">
         <h2 class="first">The best service</h2>
         <h3>Discover restaurant that deliver near you</h3>
-      </div>
+      </div> -->
     </header>
     <main>
-      <div class="section_1">
+      <!-- <div class="section_1">
         <div class="section_1-1">
           <i
             class="fa1 fa fa-clock-o"
@@ -68,114 +68,11 @@
           <p class="p1">best restaurant:</p>
           <p class="p2">taste the difference</p>
         </div>
-      </div>
+      </div> -->
       <div class="container-1" id="res">
-        <h1 class="container-1-h1">Restaurants around you</h1>
-        <div class="container">
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
-          <div class="card">
-            <img
-              src="./assets/images/download.jfif"
-              alt="Avatar"
-              style="width: 100%; height: 250px"
-            />
-            <div class="card-1">
-              <h4><b>John Doe</b></h4>
-              <a href="restaurant.html">
-                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i
-              ></a>
-            </div>
-          </div>
+        <h1 class="container-1-h1">Centers around you</h1>
+        <div class="container" id="restaurantsContainer">
+          <!-- Restaurants will be dynamically inserted here -->
         </div>
       </div>
     </main>
@@ -227,13 +124,53 @@
       </p>
     </footer>
     <script>
-      // Check if token exists in localStorage
-      window.onload = function() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          // Redirect to index page if no token found
-          window.location.href = 'index.html';
+      // const url = "http://tawseel.test";
+      const url = "https://tawseel.circleteams.com";
+
+      // Fetch restaurants when page loads
+      window.onload = async function () {
+        try {
+          const response = await fetch(url + "/api/centers");
+          if (response.ok) {
+            const data = await response.json();
+
+            displayRestaurants(data);
+          } else {
+            console.error("Failed to fetch restaurants");
+          }
+        } catch (error) {
+          console.error("Error fetching restaurants:", error);
         }
+      };
+
+      // Display restaurants in the container
+      function displayRestaurants(restaurants) {
+        console.log(restaurants);
+
+        const container = document.getElementById("restaurantsContainer");
+        container.innerHTML = ""; // Clear existing content
+
+        restaurants.forEach((restaurant) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img
+              src="${
+                restaurant.media[0].original_url ||
+                "./assets/images/download.jfif"
+              }"
+              alt="${restaurant.name}"
+              style="width: 100%; height: 250px"
+            />
+            <div class="card-1">
+              <h4><b>${restaurant.name}</b></h4>
+              <a href="restaurant.html?id=${restaurant.id}">
+                <i class="fa3 fa fa-plus-circle" style="font-size: 36px"></i>
+              </a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
       }
     </script>
   </body>
