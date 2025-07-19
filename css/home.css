@@ -231,3 +231,7 @@ h3,
   transform: rotate(180deg);
   transition: 0.7s ease-in-out;
 }
+
+.text-dark {
+  color: #000;
+}
