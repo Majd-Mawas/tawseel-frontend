@@ -27,6 +27,92 @@
       // Get restaurant ID from URL params
       const urlParams = new URLSearchParams(window.location.search);
       const center = urlParams.get("id");
+      
+      // Initialize cart from localStorage or create empty cart
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      
+      // Update cart count in the header
+      function updateCartCount() {
+        const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+        const cartCountElement = document.getElementById('cartCount');
+        
+        if (cartCountElement) {
+          cartCountElement.textContent = cartCount;
+          cartCountElement.style.display = cartCount > 0 ? 'flex' : 'none';
+        }
+      }
+      
+      // Save cart to localStorage
+      function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+      }
+      
+      // Add item to cart
+      function addToCart(meal) {
+        const existingItem = cart.find(item => item.id === meal.id);
+        
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push({
+            id: meal.id,
+            name: meal.name,
+            price: meal.price,
+            image: meal.media[0]?.original_url || "assets/images/default-meal.jpg",
+            quantity: 1
+          });
+        }
+        
+        saveCart();
+        updateQuantityDisplay(meal.id);
+      }
+      
+      // Remove item from cart
+      function removeFromCart(mealId) {
+        const existingItemIndex = cart.findIndex(item => item.id === mealId);
+        
+        if (existingItemIndex !== -1) {
+          if (cart[existingItemIndex].quantity > 1) {
+            cart[existingItemIndex].quantity -= 1;
+          } else {
+            cart.splice(existingItemIndex, 1);
+          }
+          
+          saveCart();
+          updateQuantityDisplay(mealId);
+        }
+      }
+      
+      // Update quantity display for a specific meal
+      function updateQuantityDisplay(mealId) {
+        const quantityElement = document.querySelector(`.quantity-display[data-meal-id="${mealId}"]`);
+        if (quantityElement) {
+          const cartItem = cart.find(item => item.id === mealId);
+          quantityElement.textContent = cartItem ? cartItem.quantity : 0;
+          
+          // Show/hide quantity display based on whether item is in cart
+          const quantityContainer = quantityElement.closest('.quantity-container');
+          if (quantityContainer) {
+            quantityContainer.classList.toggle('has-items', cartItem && cartItem.quantity > 0);
+          }
+        }
+      }
+      
+      // Update all quantity displays
+      function updateAllQuantityDisplays() {
+        document.querySelectorAll('.quantity-display').forEach(element => {
+          const mealId = parseInt(element.dataset.mealId);
+          const cartItem = cart.find(item => item.id === mealId);
+          element.textContent = cartItem ? cartItem.quantity : 0;
+          
+          // Show/hide quantity display based on whether item is in cart
+          const quantityContainer = element.closest('.quantity-container');
+          if (quantityContainer) {
+            quantityContainer.classList.toggle('has-items', cartItem && cartItem.quantity > 0);
+          }
+        });
+      }
 
       // Fetch restaurant meals when page loads
       window.onload = async function () {
@@ -38,6 +124,8 @@
 
             displayMeals(data.meals);
             setupFilterButtons(data.meals);
+            updateCartCount();
+            updateAllQuantityDisplays();
           } else {
             console.error("Failed to fetch meals");
           }
@@ -89,6 +177,10 @@
         container.innerHTML = "";
 
         meals.forEach((meal) => {
+          const cartItem = cart.find(item => item.id === meal.id);
+          const quantity = cartItem ? cartItem.quantity : 0;
+          const hasItems = quantity > 0;
+          
           container.innerHTML += `
           <div class="card cards_item menu-item" data-category="${meal.category.name.toLowerCase()}">
             <div class="card_image">
@@ -104,11 +196,48 @@
               </div>
             </div>
             <div class="add">
-              <span class="fa fa-plus-circle fas" style="font-size:36px"></span>
-              <span class="fa fa-minus-circle" style="font-size:36px"></span>
+              <button class="add-btn" data-meal-id="${meal.id}">
+                <span class="fa fa-plus-circle" style="font-size:24px"></span>
+              </button>
+              <div class="quantity-container ${hasItems ? 'has-items' : ''}">
+                <span class="quantity-display" data-meal-id="${meal.id}">${quantity}</span>
+              </div>
+              <button class="remove-btn ${hasItems ? 'active' : ''}" data-meal-id="${meal.id}">
+                <span class="fa fa-minus-circle" style="font-size:24px"></span>
+              </button>
             </div>
           </div>
         `;
+        });
+        
+        // Add event listeners for add and remove buttons
+        document.querySelectorAll('.add-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const mealId = parseInt(this.dataset.mealId);
+            const meal = meals.find(m => m.id === mealId);
+            if (meal) {
+              addToCart(meal);
+              
+              // Add animation effect
+              this.classList.add('clicked');
+              setTimeout(() => {
+                this.classList.remove('clicked');
+              }, 300);
+            }
+          });
+        });
+        
+        document.querySelectorAll('.remove-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const mealId = parseInt(this.dataset.mealId);
+            removeFromCart(mealId);
+            
+            // Add animation effect
+            this.classList.add('clicked');
+            setTimeout(() => {
+              this.classList.remove('clicked');
+            }, 300);
+          });
         });
       }
     </script>
@@ -120,16 +249,15 @@
         <span style="font-size: 40px; color: white">&#8592;</span></a
       >
       <h1 id="restaurantName">Center Menu</h1>
-      <a href="cart.html">
-        <i
-          class="fa fa-shopping-cart"
-          style="
-            font-size: 36px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-          "
-        ></i
-      ></a>
+      <div class="cart-icon-container">
+        <a href="#" id="cartLink">
+          <i
+            class="fa fa-shopping-cart cart-icon"
+            style="font-size: 36px; color: white;"
+          ></i>
+          <span id="cartCount" class="cart-count">0</span>
+        </a>
+      </div>
     </div>
 
     <div class="container">
@@ -144,5 +272,100 @@
         <!-- Menu items will be dynamically inserted here -->
       </ul>
     </div>
+    
+    <!-- Cart Modal (since there's no cart page) -->
+    <div id="cartModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Your Cart</h2>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+          <h3>Total: $<span id="cartTotalAmount">0.00</span></h3>
+          <button id="checkoutBtn" class="checkout-btn">Checkout</button>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // Cart Modal Functionality
+      const cartLink = document.getElementById('cartLink');
+      const cartModal = document.getElementById('cartModal');
+      const closeModal = document.querySelector('.close-modal');
+      
+      // Display cart items in modal
+      function displayCartItems() {
+        const cartItemsContainer = document.getElementById('cartItems');
+        const cartTotalElement = document.getElementById('cartTotalAmount');
+        
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+          cartTotalElement.textContent = '0.00';
+          return;
+        }
+        
+        let total = 0;
+        cartItemsContainer.innerHTML = '';
+        
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          
+          cartItemsContainer.innerHTML += `
+            <div class="cart-item">
+              <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+              <div class="cart-item-details">
+                <h3>${item.name}</h3>
+                <p>$${item.price} x ${item.quantity}</p>
+              </div>
+              <div class="cart-item-total">$${itemTotal.toFixed(2)}</div>
+              <button class="remove-cart-item" data-id="${item.id}">
+                <span class="fa fa-trash"></span>
+              </button>
+            </div>
+          `;
+        });
+        
+        cartTotalElement.textContent = total.toFixed(2);
+        
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-cart-item').forEach(button => {
+          button.addEventListener('click', function() {
+            const itemId = parseInt(this.dataset.id);
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            
+            if (itemIndex !== -1) {
+              cart.splice(itemIndex, 1);
+              saveCart();
+              displayCartItems();
+              updateAllQuantityDisplays();
+            }
+          });
+        });
+      }
+      
+      // Open cart modal
+      cartLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        displayCartItems();
+        cartModal.style.display = 'block';
+      });
+      
+      // Close cart modal
+      closeModal.addEventListener('click', function() {
+        cartModal.style.display = 'none';
+      });
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', function(event) {
+        if (event.target === cartModal) {
+          cartModal.style.display = 'none';
+        }
+      });
+      
+      // Checkout button
+      document.getElementById('checkoutBtn').addEventListener('click', function() {
+        alert('Checkout functionality will be implemented later');
+      });
+    </script>
   </body>
 </html>
