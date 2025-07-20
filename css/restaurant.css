@@ -156,6 +156,7 @@ h3,
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  gap: 20px;
 }
 .container span {
   margin-left: 10px;
@@ -229,6 +230,7 @@ h3,
   list-style: none;
   margin: 0;
   padding: 0;
+  gap: 20px;
 }
 
 .cards_item {
@@ -281,15 +283,20 @@ h3,
 
 .card {
   background-color: white;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.25);
-  margin-left: 20px;
+  /* margin-left: 20px; */
   margin-bottom: 20px;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  width: 30%;
+  /* width: 30%; */
   border: #333 1px solid;
+
+  width: calc(25% - 15px);
+  min-width: 250px;
+  border-radius: 20px;
+  margin-top: 20px;
 }
 
 .card_content {
@@ -351,4 +358,40 @@ h3,
 }
 .fas {
   padding-right: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .card {
+    width: calc(50% - 10px);
+  }
+
+  nav {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  nav ul {
+    margin: 10px 0;
+  }
+
+  .button {
+    margin: 10px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav ul li {
+    padding: 10px;
+  }
 }

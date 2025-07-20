@@ -142,17 +142,55 @@ nav ul li a:hover::after {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 20px;
+  padding: 0 15px;
 }
+
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: 0.3s;
-  width: 20%;
+  width: calc(25% - 15px);
+  min-width: 250px;
   border-radius: 20px;
-  margin-left: 10px;
-  margin-top: 50px;
+  margin-top: 20px;
   overflow: hidden;
 }
 
+@media screen and (max-width: 768px) {
+  .card {
+    width: calc(50% - 10px);
+  }
+
+  nav {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  nav ul {
+    margin: 10px 0;
+  }
+
+  .button {
+    margin: 10px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav ul li {
+    padding: 10px;
+  }
+}
 .card:hover {
   transition: all 0.3s ease-in-out;
   transform: translateY(-10px);
@@ -234,4 +272,26 @@ h3,
 
 .text-dark {
   color: #000;
+}
+
+.filters {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.filter-btn {
+  background-color: #bf8208;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background-color: #a46c06;
 }

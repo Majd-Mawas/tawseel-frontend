@@ -30,9 +30,9 @@
         </div>
         <ul>
           <li><a href="home.html" class="active">HOME</a></li>
-          <li><a href="about.html" class="">ABOUT</a></li>
-          <li><a href="#res" class="">RESTAURANT</a></li>
-          <li><a href="contact.html" class="">CONTACT</a></li>
+          <!-- <li><a href="about.html" class="">ABOUT</a></li> -->
+          <li><a href="#res" class="">CENTERS</a></li>
+          <!-- <li><a href="contact.html" class="">CONTACT</a></li> -->
         </ul>
         <a href="index.html" class="button">log out</a>
       </nav>
@@ -71,6 +71,17 @@
       </div> -->
       <div class="container-1" id="res">
         <h1 class="container-1-h1">Centers around you</h1>
+        <div class="filters">
+          <button onclick="filterCenters('all')" class="filter-btn active">
+            All
+          </button>
+          <button onclick="filterCenters('restaurant')" class="filter-btn">
+            Restaurants
+          </button>
+          <button onclick="filterCenters('shop_center')" class="filter-btn">
+            Shop Centers
+          </button>
+        </div>
         <div class="container" id="restaurantsContainer">
           <!-- Restaurants will be dynamically inserted here -->
         </div>
@@ -124,17 +135,18 @@
       </p>
     </footer>
     <script>
-      // const url = "http://tawseel.test";
       const url = "https://tawseel.circleteams.com";
+      // const url = "http://tawseel.test";
 
-      // Fetch restaurants when page loads
+      let allCenters = [];
+
       window.onload = async function () {
         try {
           const response = await fetch(url + "/api/centers");
           if (response.ok) {
             const data = await response.json();
-
-            displayRestaurants(data);
+            allCenters = data;
+            displayRestaurants(allCenters);
           } else {
             console.error("Failed to fetch restaurants");
           }
@@ -143,12 +155,15 @@
         }
       };
 
-      // Display restaurants in the container
       function displayRestaurants(restaurants) {
-        console.log(restaurants);
-
         const container = document.getElementById("restaurantsContainer");
-        container.innerHTML = ""; // Clear existing content
+        container.innerHTML = "";
+
+        if (!restaurants.length) {
+          container.innerHTML =
+            "<p style='text-align:center;'>No centers found.</p>";
+          return;
+        }
 
         restaurants.forEach((restaurant) => {
           const card = document.createElement("div");
@@ -156,7 +171,7 @@
           card.innerHTML = `
             <img
               src="${
-                restaurant.media[0].original_url ||
+                restaurant.media?.[0]?.original_url ||
                 "./assets/images/download.jfif"
               }"
               alt="${restaurant.name}"
@@ -171,6 +186,23 @@
           `;
           container.appendChild(card);
         });
+      }
+
+      function filterCenters(type) {
+        // Update active button style
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelector(`.filter-btn[onclick="filterCenters('${type}')"]`)
+          .classList.add("active");
+
+        if (type === "all") {
+          displayRestaurants(allCenters);
+        } else {
+          const filtered = allCenters.filter((center) => center.type === type);
+          displayRestaurants(filtered);
+        }
       }
     </script>
   </body>
