@@ -19,6 +19,18 @@
       href="https://fonts.googleapis.com/css?family=Yesteryear&display=swap"
       rel="stylesheet"
     />
+    <!-- Leaflet CSS and JS (replacing Google Maps API) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine for route calculation -->
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+    />
 
     <script>
       // const url = "http://tawseel.test";
@@ -27,31 +39,34 @@
       // Get restaurant ID from URL params
       const urlParams = new URLSearchParams(window.location.search);
       const center = urlParams.get("id");
-      
+
       // Initialize cart from localStorage or create empty cart
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
       // Update cart count in the header
       function updateCartCount() {
-        const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-        const cartCountElement = document.getElementById('cartCount');
-        
+        const cartCount = cart.reduce(
+          (total, item) => total + item.quantity,
+          0
+        );
+        const cartCountElement = document.getElementById("cartCount");
+
         if (cartCountElement) {
           cartCountElement.textContent = cartCount;
-          cartCountElement.style.display = cartCount > 0 ? 'flex' : 'none';
+          cartCountElement.style.display = cartCount > 0 ? "flex" : "none";
         }
       }
-      
+
       // Save cart to localStorage
       function saveCart() {
-        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem("cart", JSON.stringify(cart));
         updateCartCount();
       }
-      
+
       // Add item to cart
       function addToCart(meal) {
-        const existingItem = cart.find(item => item.id === meal.id);
-        
+        const existingItem = cart.find((item) => item.id === meal.id);
+
         if (existingItem) {
           existingItem.quantity += 1;
         } else {
@@ -59,57 +74,68 @@
             id: meal.id,
             name: meal.name,
             price: meal.price,
-            image: meal.media[0]?.original_url || "assets/images/default-meal.jpg",
-            quantity: 1
+            image:
+              meal.media[0]?.original_url || "assets/images/default-meal.jpg",
+            quantity: 1,
           });
         }
-        
+
         saveCart();
         updateQuantityDisplay(meal.id);
       }
-      
+
       // Remove item from cart
       function removeFromCart(mealId) {
-        const existingItemIndex = cart.findIndex(item => item.id === mealId);
-        
+        const existingItemIndex = cart.findIndex((item) => item.id === mealId);
+
         if (existingItemIndex !== -1) {
           if (cart[existingItemIndex].quantity > 1) {
             cart[existingItemIndex].quantity -= 1;
           } else {
             cart.splice(existingItemIndex, 1);
           }
-          
+
           saveCart();
           updateQuantityDisplay(mealId);
         }
       }
-      
+
       // Update quantity display for a specific meal
       function updateQuantityDisplay(mealId) {
-        const quantityElement = document.querySelector(`.quantity-display[data-meal-id="${mealId}"]`);
+        const quantityElement = document.querySelector(
+          `.quantity-display[data-meal-id="${mealId}"]`
+        );
         if (quantityElement) {
-          const cartItem = cart.find(item => item.id === mealId);
+          const cartItem = cart.find((item) => item.id === mealId);
           quantityElement.textContent = cartItem ? cartItem.quantity : 0;
-          
+
           // Show/hide quantity display based on whether item is in cart
-          const quantityContainer = quantityElement.closest('.quantity-container');
+          const quantityContainer = quantityElement.closest(
+            ".quantity-container"
+          );
           if (quantityContainer) {
-            quantityContainer.classList.toggle('has-items', cartItem && cartItem.quantity > 0);
+            quantityContainer.classList.toggle(
+              "has-items",
+              cartItem && cartItem.quantity > 0
+            );
           }
         }
       }
-      
+
       // Update all quantity displays
       function updateAllQuantityDisplays() {
-        document.querySelectorAll('.quantity-display').forEach(element => {
+        document.querySelectorAll(".quantity-display").forEach((element) => {
           const mealId = parseInt(element.dataset.mealId);
-          const cartItem = cart.find(item => item.id === mealId);
+          const cartItem = cart.find((item) => item.id === mealId);
           element.textContent = cartItem ? cartItem.quantity : 0;
-          
+
           // Show/hide quantity display based on whether item is in cart
-          const quantityContainer = element.closest('.quantity-container');
+          const quantityContainer = element.closest(".quantity-container");
           if (quantityContainer) {
-            quantityContainer.classList.toggle('has-items', cartItem && cartItem.quantity > 0);
+            quantityContainer.classList.toggle(
+              "has-items",
+              cartItem && cartItem.quantity > 0
+            );
           }
         });
       }
@@ -177,10 +203,10 @@
         container.innerHTML = "";
 
         meals.forEach((meal) => {
-          const cartItem = cart.find(item => item.id === meal.id);
+          const cartItem = cart.find((item) => item.id === meal.id);
           const quantity = cartItem ? cartItem.quantity : 0;
           const hasItems = quantity > 0;
-          
+
           container.innerHTML += `
           <div class="card cards_item menu-item" data-category="${meal.category.name.toLowerCase()}">
             <div class="card_image">
@@ -199,43 +225,47 @@
               <button class="add-btn" data-meal-id="${meal.id}">
                 <span class="fa fa-plus-circle" style="font-size:24px"></span>
               </button>
-              <div class="quantity-container ${hasItems ? 'has-items' : ''}">
-                <span class="quantity-display" data-meal-id="${meal.id}">${quantity}</span>
+              <div class="quantity-container ${hasItems ? "has-items" : ""}">
+                <span class="quantity-display" data-meal-id="${
+                  meal.id
+                }">${quantity}</span>
               </div>
-              <button class="remove-btn ${hasItems ? 'active' : ''}" data-meal-id="${meal.id}">
+              <button class="remove-btn ${
+                hasItems ? "active" : ""
+              }" data-meal-id="${meal.id}">
                 <span class="fa fa-minus-circle" style="font-size:24px"></span>
               </button>
             </div>
           </div>
         `;
         });
-        
+
         // Add event listeners for add and remove buttons
-        document.querySelectorAll('.add-btn').forEach(button => {
-          button.addEventListener('click', function() {
+        document.querySelectorAll(".add-btn").forEach((button) => {
+          button.addEventListener("click", function () {
             const mealId = parseInt(this.dataset.mealId);
-            const meal = meals.find(m => m.id === mealId);
+            const meal = meals.find((m) => m.id === mealId);
             if (meal) {
               addToCart(meal);
-              
+
               // Add animation effect
-              this.classList.add('clicked');
+              this.classList.add("clicked");
               setTimeout(() => {
-                this.classList.remove('clicked');
+                this.classList.remove("clicked");
               }, 300);
             }
           });
         });
-        
-        document.querySelectorAll('.remove-btn').forEach(button => {
-          button.addEventListener('click', function() {
+
+        document.querySelectorAll(".remove-btn").forEach((button) => {
+          button.addEventListener("click", function () {
             const mealId = parseInt(this.dataset.mealId);
             removeFromCart(mealId);
-            
+
             // Add animation effect
-            this.classList.add('clicked');
+            this.classList.add("clicked");
             setTimeout(() => {
-              this.classList.remove('clicked');
+              this.classList.remove("clicked");
             }, 300);
           });
         });
@@ -253,7 +283,7 @@
         <a href="#" id="cartLink">
           <i
             class="fa fa-shopping-cart cart-icon"
-            style="font-size: 36px; color: white;"
+            style="font-size: 36px; color: white"
           ></i>
           <span id="cartCount" class="cart-count">0</span>
         </a>
@@ -272,7 +302,7 @@
         <!-- Menu items will be dynamically inserted here -->
       </ul>
     </div>
-    
+
     <!-- Cart Modal (since there's no cart page) -->
     <div id="cartModal" class="modal">
       <div class="modal-content">
@@ -283,36 +313,49 @@
           <h3>Total: $<span id="cartTotalAmount">0.00</span></h3>
           <button id="checkoutBtn" class="checkout-btn">Checkout</button>
         </div>
+        <!-- Add map container -->
+        <div id="mapContainer" style="display: none; margin-top: 20px">
+          <h3>Delivery Route</h3>
+          <div id="orderDetails" style="margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+            <div><strong>Total Price:</strong> $<span id="orderTotalPrice">0.00</span></div>
+            <div><strong>Delivery Fee:</strong> $<span id="orderDeliveryFee">0.00</span></div>
+            <div><strong>Estimated Delivery Time:</strong> <span id="orderDeliveryTime">0</span> minutes</div>
+          </div>
+          <div id="map" style="height: 300px; width: 100%"></div>
+        </div>
       </div>
     </div>
-    
+
     <script>
       // Cart Modal Functionality
-      const cartLink = document.getElementById('cartLink');
-      const cartModal = document.getElementById('cartModal');
-      const closeModal = document.querySelector('.close-modal');
-      
+      const cartLink = document.getElementById("cartLink");
+      const cartModal = document.getElementById("cartModal");
+      const closeModal = document.querySelector(".close-modal");
+
       // Display cart items in modal
       function displayCartItems() {
-        const cartItemsContainer = document.getElementById('cartItems');
-        const cartTotalElement = document.getElementById('cartTotalAmount');
-        
+        const cartItemsContainer = document.getElementById("cartItems");
+        const cartTotalElement = document.getElementById("cartTotalAmount");
+
         if (cart.length === 0) {
-          cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
-          cartTotalElement.textContent = '0.00';
+          cartItemsContainer.innerHTML =
+            '<p class="empty-cart">Your cart is empty</p>';
+          cartTotalElement.textContent = "0.00";
           return;
         }
-        
+
         let total = 0;
-        cartItemsContainer.innerHTML = '';
-        
-        cart.forEach(item => {
+        cartItemsContainer.innerHTML = "";
+
+        cart.forEach((item) => {
           const itemTotal = item.price * item.quantity;
           total += itemTotal;
-          
+
           cartItemsContainer.innerHTML += `
             <div class="cart-item">
-              <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+              <img src="${item.image}" alt="${
+            item.name
+          }" class="cart-item-image">
               <div class="cart-item-details">
                 <h3>${item.name}</h3>
                 <p>$${item.price} x ${item.quantity}</p>
@@ -324,15 +367,15 @@
             </div>
           `;
         });
-        
+
         cartTotalElement.textContent = total.toFixed(2);
-        
+
         // Add event listeners to remove buttons
-        document.querySelectorAll('.remove-cart-item').forEach(button => {
-          button.addEventListener('click', function() {
+        document.querySelectorAll(".remove-cart-item").forEach((button) => {
+          button.addEventListener("click", function () {
             const itemId = parseInt(this.dataset.id);
-            const itemIndex = cart.findIndex(item => item.id === itemId);
-            
+            const itemIndex = cart.findIndex((item) => item.id === itemId);
+
             if (itemIndex !== -1) {
               cart.splice(itemIndex, 1);
               saveCart();
@@ -342,30 +385,172 @@
           });
         });
       }
-      
+
       // Open cart modal
-      cartLink.addEventListener('click', function(e) {
+      cartLink.addEventListener("click", function (e) {
         e.preventDefault();
         displayCartItems();
-        cartModal.style.display = 'block';
+        cartModal.style.display = "block";
       });
-      
+
       // Close cart modal
-      closeModal.addEventListener('click', function() {
-        cartModal.style.display = 'none';
+      closeModal.addEventListener("click", function () {
+        cartModal.style.display = "none";
       });
-      
+
       // Close modal when clicking outside
-      window.addEventListener('click', function(event) {
+      window.addEventListener("click", function (event) {
         if (event.target === cartModal) {
-          cartModal.style.display = 'none';
+          cartModal.style.display = "none";
         }
       });
-      
+
       // Checkout button
-      document.getElementById('checkoutBtn').addEventListener('click', function() {
-        alert('Checkout functionality will be implemented later');
-      });
+      document
+        .getElementById("checkoutBtn")
+        .addEventListener("click", function () {
+          // Check if cart is empty
+          if (cart.length === 0) {
+            alert("Your cart is empty");
+            return;
+          }
+
+          // Get user's location
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              function (position) {
+                // Prepare data for API request
+                const items = cart.map((item) => ({
+                  meal_id: item.id,
+                  quantity: item.quantity,
+                }));
+
+                const orderData = {
+                  center_id: center, // We already have this from URL params
+                  items: items,
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                };
+
+                // Send POST request to checkout endpoint
+                fetch(`${url}/api/checkout`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                  },
+                  body: JSON.stringify(orderData),
+                })
+                  .then((response) => {
+                    if (response.ok) {
+                      return response.json();
+                    }
+                    throw new Error("Checkout failed");
+                  })
+                  .then((data) => {
+                    console.log(data.data.restaurant);
+
+                    // Show success message
+                    alert("Order placed successfully!");
+
+                    // Display order details
+                    if (data.data) {
+                      document.getElementById("orderTotalPrice").textContent = 
+                        ((data.data.total_price || 0) / 100).toFixed(2);
+                      document.getElementById("orderDeliveryFee").textContent = 
+                        ((data.data.delivery_fee || 0) / 100).toFixed(2);
+                      document.getElementById("orderDeliveryTime").textContent = 
+                        data.data.delivery_time_estimate || "N/A";
+                    }
+
+                    // Display the map with the route
+                    if (
+                      data.data.restaurant &&
+                      data.data.restaurant.latitude &&
+                      data.data.restaurant.longitude
+                    ) {
+                      // Show map container
+                      document.getElementById("mapContainer").style.display =
+                        "block";
+
+                      // Get coordinates
+                      const userLatLng = [
+                        position.coords.latitude,
+                        position.coords.longitude,
+                      ];
+                      const centerLatLng = [
+                        parseFloat(data.data.restaurant.latitude),
+                        parseFloat(data.data.restaurant.longitude),
+                      ];
+
+                      // Initialize Leaflet map
+                      const map = L.map("map").setView(userLatLng, 13);
+
+                      // Add OpenStreetMap tiles
+                      L.tileLayer(
+                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        {
+                          attribution: "© OpenStreetMap contributors",
+                        }
+                      ).addTo(map);
+
+                      // Add markers for user and center locations
+                      L.marker(userLatLng)
+                        .addTo(map)
+                        .bindPopup("Your Location")
+                        .openPopup();
+
+                      L.marker(centerLatLng)
+                        .addTo(map)
+                        .bindPopup(data.data.restaurant.name || "Center Location");
+
+                      // Use Leaflet Routing Machine for route calculation
+                      const routingControl = L.Routing.control({
+                        waypoints: [
+                          L.latLng(userLatLng),
+                          L.latLng(centerLatLng),
+                        ],
+                        routeWhileDragging: false,
+                        showAlternatives: false,
+                        fitSelectedRoutes: true,
+                        lineOptions: {
+                          styles: [{ color: "#0073FF", weight: 4 }],
+                        },
+                      }).addTo(map);
+
+                      // Adjust map size after it's displayed
+                      setTimeout(() => {
+                        map.invalidateSize();
+                      }, 100);
+                    } else {
+                      console.error(
+                        "Center location data not available in the response"
+                      );
+                    }
+
+                    // Clear cart after successful checkout
+                    cart = [];
+                    saveCart();
+                  })
+                  .catch((error) => {
+                    console.error("Error during checkout:", error);
+                    alert("Failed to place order. Please try again.");
+                  });
+              },
+              function (error) {
+                console.error("Error getting location:", error);
+                alert(
+                  "We need your location to process the order. Please enable location services and try again."
+                );
+              }
+            );
+          } else {
+            alert(
+              "Geolocation is not supported by this browser. We need your location to process the order."
+            );
+          }
+        });
     </script>
   </body>
 </html>
