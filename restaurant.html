@@ -31,7 +31,40 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
     />
-
+    
+    <style>
+      /* Pagination styles */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        gap: 5px;
+      }
+      
+      .pagination-btn {
+        padding: 8px 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .pagination-btn:hover:not([disabled]) {
+        background-color: #e9ecef;
+      }
+      
+      .pagination-btn.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+      
+      .pagination-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    </style>
     <script>
       // const url = "http://tawseel.test";
       const url = "https://tawseel.circleteams.com";
@@ -140,6 +173,11 @@
         });
       }
 
+      // Global variables for pagination
+      let currentPage = 1;
+      const itemsPerPage = 12; // Number of meals to display per page
+      let allMeals = []; // Store all meals for pagination
+
       // Fetch restaurant meals when page loads
       window.onload = async function () {
         try {
@@ -148,8 +186,10 @@
             const data = await response.json();
             console.log(data);
 
-            displayMeals(data.meals);
-            setupFilterButtons(data.meals);
+            allMeals = data.meals; // Store all meals
+            displayMeals(allMeals, currentPage); // Display first page
+            setupPagination(allMeals); // Setup pagination controls
+            setupFilterButtons(allMeals);
             updateCartCount();
             updateAllQuantityDisplays();
           } else {
@@ -160,49 +200,16 @@
         }
       };
 
-      function setupFilterButtons(meals) {
-        const categories = [
-          ...new Set(meals.map((meal) => meal.category.name)),
-        ];
-        const filterContainer = document.querySelector(".filter-buttons");
-
-        // Add "All" button
-        filterContainer.innerHTML = `
-        <button class="filter-btn active" data-category="all">All Items</button>
-      `;
-
-        // Add category buttons
-        categories.forEach((category) => {
-          filterContainer.innerHTML += `
-          <button class="filter-btn" data-category="${category.toLowerCase()}">${category}</button>
-        `;
-        });
-
-        // Setup filter functionality
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        filterButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            const category = button.dataset.category;
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            button.classList.add("active");
-
-            const menuItems = document.querySelectorAll(".menu-item");
-            menuItems.forEach((item) => {
-              if (category === "all" || item.dataset.category === category) {
-                item.style.display = "block";
-              } else {
-                item.style.display = "none";
-              }
-            });
-          });
-        });
-      }
-
-      function displayMeals(meals) {
+      function displayMeals(meals, page) {
         const container = document.querySelector(".cards");
         container.innerHTML = "";
 
-        meals.forEach((meal) => {
+        // Calculate start and end index for current page
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, meals.length);
+        const paginatedMeals = meals.slice(startIndex, endIndex);
+
+        paginatedMeals.forEach((meal) => {
           const cartItem = cart.find((item) => item.id === meal.id);
           const quantity = cartItem ? cartItem.quantity : 0;
           const hasItems = quantity > 0;
@@ -244,7 +251,7 @@
         document.querySelectorAll(".add-btn").forEach((button) => {
           button.addEventListener("click", function () {
             const mealId = parseInt(this.dataset.mealId);
-            const meal = meals.find((m) => m.id === mealId);
+            const meal = allMeals.find((m) => m.id === mealId);
             if (meal) {
               addToCart(meal);
 
@@ -267,6 +274,122 @@
             setTimeout(() => {
               this.classList.remove("clicked");
             }, 300);
+          });
+        });
+      }
+
+      // Setup pagination controls
+      function setupPagination(meals) {
+        const totalPages = Math.ceil(meals.length / itemsPerPage);
+        const paginationContainer = document.createElement('div');
+        paginationContainer.className = 'pagination';
+        
+        // Create pagination HTML
+        let paginationHTML = '';
+        
+        // Previous button
+        paginationHTML += `<button class="pagination-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+        
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHTML += `<button class="pagination-btn page-btn ${currentPage === i ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        
+        // Next button
+        paginationHTML += `<button class="pagination-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
+        
+        paginationContainer.innerHTML = paginationHTML;
+        
+        // Insert pagination after the cards container
+        const mainContainer = document.querySelector('.main');
+        mainContainer.appendChild(paginationContainer);
+        
+        // Add event listeners to pagination buttons
+        document.querySelectorAll('.page-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            currentPage = parseInt(this.dataset.page);
+            displayMeals(meals, currentPage);
+            updatePaginationButtons(meals);
+          });
+        });
+        
+        document.querySelector('.prev-btn').addEventListener('click', function() {
+          if (currentPage > 1) {
+            currentPage--;
+            displayMeals(meals, currentPage);
+            updatePaginationButtons(meals);
+          }
+        });
+        
+        document.querySelector('.next-btn').addEventListener('click', function() {
+          if (currentPage < totalPages) {
+            currentPage++;
+            displayMeals(meals, currentPage);
+            updatePaginationButtons(meals);
+          }
+        });
+      }
+
+      // Update pagination buttons active state
+      function updatePaginationButtons(meals) {
+        const totalPages = Math.ceil(meals.length / itemsPerPage);
+        
+        // Update page buttons
+        document.querySelectorAll('.page-btn').forEach(button => {
+          const page = parseInt(button.dataset.page);
+          button.classList.toggle('active', page === currentPage);
+        });
+        
+        // Update prev/next buttons
+        document.querySelector('.prev-btn').disabled = (currentPage === 1);
+        document.querySelector('.next-btn').disabled = (currentPage === totalPages);
+      }
+
+      // Modify filter buttons to work with pagination
+      function setupFilterButtons(meals) {
+        const categories = [
+          ...new Set(meals.map((meal) => meal.category.name)),
+        ];
+        const filterContainer = document.querySelector(".filter-buttons");
+
+        // Add "All" button
+        filterContainer.innerHTML = `
+        <button class="filter-btn active" data-category="all">All Items</button>
+      `;
+
+        // Add category buttons
+        categories.forEach((category) => {
+          filterContainer.innerHTML += `
+          <button class="filter-btn" data-category="${category.toLowerCase()}">${category}</button>
+        `;
+        });
+
+        // Setup filter functionality
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const category = button.dataset.category;
+            filterButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            // Filter meals based on category
+            let filteredMeals = allMeals;
+            if (category !== "all") {
+              filteredMeals = allMeals.filter(
+                meal => meal.category.name.toLowerCase() === category
+              );
+            }
+            
+            // Reset to first page when filtering
+            currentPage = 1;
+            displayMeals(filteredMeals, currentPage);
+            
+            // Remove old pagination and create new one for filtered meals
+            const oldPagination = document.querySelector('.pagination');
+            if (oldPagination) {
+              oldPagination.remove();
+            }
+            setupPagination(filteredMeals);
           });
         });
       }
