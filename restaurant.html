@@ -316,10 +316,29 @@
         <!-- Add map container -->
         <div id="mapContainer" style="display: none; margin-top: 20px">
           <h3>Delivery Route</h3>
-          <div id="orderDetails" style="margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
-            <div><strong>Total Price:</strong> $<span id="orderTotalPrice">0.00</span></div>
-            <div><strong>Delivery Fee:</strong> $<span id="orderDeliveryFee">0.00</span></div>
-            <div><strong>Estimated Delivery Time:</strong> <span id="orderDeliveryTime">0</span> minutes</div>
+          <div
+            id="orderDetails"
+            style="
+              margin-bottom: 15px;
+              padding: 10px;
+              background-color: #f8f9fa;
+              border-radius: 5px;
+            "
+          >
+            <div>
+              <strong>Total Price:</strong> $<span id="orderTotalPrice"
+                >0.00</span
+              >
+            </div>
+            <div>
+              <strong>Delivery Fee:</strong> $<span id="orderDeliveryFee"
+                >0.00</span
+              >
+            </div>
+            <div>
+              <strong>Estimated Delivery Time:</strong>
+              <span id="orderDeliveryTime">0</span> minutes
+            </div>
           </div>
           <div id="map" style="height: 300px; width: 100%"></div>
         </div>
@@ -327,12 +346,128 @@
     </div>
 
     <script>
-      // Cart Modal Functionality
+      function calculateAStarPath(start, end, gridSize = 20) {
+        console.log("Calculating A* path from", start, "to", end);
+
+        function heuristic(a, b) {
+          const R = 6371;
+          const dLat = ((b[0] - a[0]) * Math.PI) / 180;
+          const dLon = ((b[1] - a[1]) * Math.PI) / 180;
+          const lat1 = (a[0] * Math.PI) / 180;
+          const lat2 = (b[0] * Math.PI) / 180;
+
+          const x = dLon * Math.cos((lat1 + lat2) / 2);
+          const y = dLat;
+          return Math.sqrt(x * x + y * y) * R;
+        }
+
+        function createGrid(start, end, size) {
+          const grid = [];
+          const latStep = (end[0] - start[0]) / size;
+          const lngStep = (end[1] - start[1]) / size;
+
+          for (let i = 0; i <= size; i++) {
+            for (let j = 0; j <= size; j++) {
+              const lat = start[0] + i * latStep;
+              const lng = start[1] + j * lngStep;
+              grid.push([lat, lng]);
+            }
+          }
+
+          return grid;
+        }
+
+        class Node {
+          constructor(position, parent = null) {
+            this.position = position;
+            this.parent = parent;
+            this.g = parent
+              ? parent.g + heuristic(parent.position, position)
+              : 0;
+            this.h = heuristic(position, end);
+            this.f = this.g + this.h;
+          }
+        }
+
+        const grid = createGrid(start, end, gridSize);
+
+        const openSet = [new Node(start)];
+        const closedSet = [];
+
+        function getNeighbors(node, grid) {
+          return grid.filter((point) => {
+            const distance = heuristic(node.position, point);
+            return distance > 0 && distance < 0.5;
+          });
+        }
+
+        while (openSet.length > 0) {
+          let currentIndex = 0;
+          for (let i = 0; i < openSet.length; i++) {
+            if (openSet[i].f < openSet[currentIndex].f) {
+              currentIndex = i;
+            }
+          }
+
+          const current = openSet[currentIndex];
+
+          if (heuristic(current.position, end) < 0.1) {
+            const path = [];
+            let temp = current;
+            while (temp) {
+              path.push(temp.position);
+              temp = temp.parent;
+            }
+            return path.reverse();
+          }
+
+          openSet.splice(currentIndex, 1);
+          closedSet.push(current);
+
+          const neighbors = getNeighbors(current, grid);
+          for (const neighborPos of neighbors) {
+            if (
+              closedSet.some(
+                (node) => heuristic(node.position, neighborPos) < 0.01
+              )
+            ) {
+              continue;
+            }
+
+            const neighbor = new Node(neighborPos, current);
+
+            const openNode = openSet.find(
+              (node) => heuristic(node.position, neighborPos) < 0.01
+            );
+            if (openNode && neighbor.g >= openNode.g) {
+              continue;
+            }
+
+            if (!openNode) {
+              openSet.push(neighbor);
+            } else {
+              openNode.parent = current;
+              openNode.g = neighbor.g;
+              openNode.f = openNode.g + openNode.h;
+            }
+          }
+
+          if (closedSet.length > 1000) {
+            console.warn("A* algorithm reached iteration limit");
+            break;
+          }
+        }
+
+        console.warn("A* could not find optimal path, returning direct line");
+        return [start, end];
+      }
+    </script>
+
+    <script>
       const cartLink = document.getElementById("cartLink");
       const cartModal = document.getElementById("cartModal");
       const closeModal = document.querySelector(".close-modal");
 
-      // Display cart items in modal
       function displayCartItems() {
         const cartItemsContainer = document.getElementById("cartItems");
         const cartTotalElement = document.getElementById("cartTotalAmount");
@@ -370,7 +505,6 @@
 
         cartTotalElement.textContent = total.toFixed(2);
 
-        // Add event listeners to remove buttons
         document.querySelectorAll(".remove-cart-item").forEach((button) => {
           button.addEventListener("click", function () {
             const itemId = parseInt(this.dataset.id);
@@ -386,59 +520,51 @@
         });
       }
 
-      // Open cart modal
       cartLink.addEventListener("click", function (e) {
         e.preventDefault();
         displayCartItems();
         cartModal.style.display = "block";
       });
 
-      // Close cart modal
       closeModal.addEventListener("click", function () {
         cartModal.style.display = "none";
       });
 
-      // Close modal when clicking outside
       window.addEventListener("click", function (event) {
         if (event.target === cartModal) {
           cartModal.style.display = "none";
         }
       });
 
-      // Checkout button
       document
         .getElementById("checkoutBtn")
         .addEventListener("click", function () {
-          // Check if cart is empty
           if (cart.length === 0) {
             alert("Your cart is empty");
             return;
           }
 
-          // Get user's location
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               function (position) {
-                // Prepare data for API request
                 const items = cart.map((item) => ({
                   meal_id: item.id,
                   quantity: item.quantity,
                 }));
 
                 const orderData = {
-                  center_id: center, // We already have this from URL params
+                  center_id: center,
                   items: items,
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude,
                 };
 
-                // Send POST request to checkout endpoint
                 fetch(`${url}/api/checkout`, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
                   },
                   body: JSON.stringify(orderData),
                 })
@@ -451,30 +577,25 @@
                   .then((data) => {
                     console.log(data.data.restaurant);
 
-                    // Show success message
                     alert("Order placed successfully!");
 
-                    // Display order details
                     if (data.data) {
-                      document.getElementById("orderTotalPrice").textContent = 
-                        ((data.data.total_price || 0) / 100).toFixed(2);
-                      document.getElementById("orderDeliveryFee").textContent = 
+                      document.getElementById("orderTotalPrice").textContent = (
+                        (data.data.total_price || 0) / 100
+                      ).toFixed(2);
+                      document.getElementById("orderDeliveryFee").textContent =
                         ((data.data.delivery_fee || 0) / 100).toFixed(2);
-                      document.getElementById("orderDeliveryTime").textContent = 
+                      document.getElementById("orderDeliveryTime").textContent =
                         data.data.delivery_time_estimate || "N/A";
                     }
-
-                    // Display the map with the route
                     if (
                       data.data.restaurant &&
                       data.data.restaurant.latitude &&
                       data.data.restaurant.longitude
                     ) {
-                      // Show map container
                       document.getElementById("mapContainer").style.display =
                         "block";
 
-                      // Get coordinates
                       const userLatLng = [
                         position.coords.latitude,
                         position.coords.longitude,
@@ -484,10 +605,8 @@
                         parseFloat(data.data.restaurant.longitude),
                       ];
 
-                      // Initialize Leaflet map
                       const map = L.map("map").setView(userLatLng, 13);
 
-                      // Add OpenStreetMap tiles
                       L.tileLayer(
                         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                         {
@@ -495,7 +614,6 @@
                         }
                       ).addTo(map);
 
-                      // Add markers for user and center locations
                       L.marker(userLatLng)
                         .addTo(map)
                         .bindPopup("Your Location")
@@ -503,9 +621,10 @@
 
                       L.marker(centerLatLng)
                         .addTo(map)
-                        .bindPopup(data.data.restaurant.name || "Center Location");
+                        .bindPopup(
+                          data.data.restaurant.name || "Center Location"
+                        );
 
-                      // Use Leaflet Routing Machine for route calculation
                       const routingControl = L.Routing.control({
                         waypoints: [
                           L.latLng(userLatLng),
@@ -519,7 +638,6 @@
                         },
                       }).addTo(map);
 
-                      // Adjust map size after it's displayed
                       setTimeout(() => {
                         map.invalidateSize();
                       }, 100);
@@ -529,7 +647,6 @@
                       );
                     }
 
-                    // Clear cart after successful checkout
                     cart = [];
                     saveCart();
                   })
