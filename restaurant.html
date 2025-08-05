@@ -213,7 +213,7 @@
               <img src="${
                 meal.media[0]?.original_url || "assets/images/default-meal.jpg"
               }" alt="${meal.name}" />
-              <span class="card_price"><span></span>${meal.price}</span>
+              <span class="card_price"><span>S.P.</span>${meal.price}</span>
             </div>
             <div class="card_content">
               <h2 class="card_title">${meal.name}</h2>
@@ -310,7 +310,7 @@
         <h2>Your Cart</h2>
         <div id="cartItems"></div>
         <div class="cart-total">
-          <h3>Total:<span id="cartTotalAmount">0.00</span></h3>
+          <h3>Total: S.P.<span id="cartTotalAmount">0.00</span></h3>
           <button id="checkoutBtn" class="checkout-btn">Checkout</button>
         </div>
         <!-- Add map container -->
@@ -493,7 +493,7 @@
           }" class="cart-item-image">
               <div class="cart-item-details">
                 <h3>${item.name}</h3>
-                <p>${item.price} x ${item.quantity}</p>
+                <p>S.P.${item.price} x ${item.quantity}</p>
               </div>
               <div class="cart-item-total">$${itemTotal.toFixed(2)}</div>
               <button class="remove-cart-item" data-id="${item.id}">
