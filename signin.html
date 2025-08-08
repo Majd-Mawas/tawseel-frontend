@@ -20,7 +20,7 @@
         display: none;
         animation: fadeIn 0.3s ease-out;
       }
-      
+
       .input-group.error input {
         border-color: #ff3333;
         box-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
@@ -54,9 +54,9 @@
           />
           <div class="error-message" id="password-error"></div>
         </div>
-        <!-- <div class="forgot-password">
-          <a href="#">Forgot password?</a>
-        </div> -->
+        <div class="forgot-password">
+          <a href="forgot-password.html">Forgot password?</a>
+        </div>
         <button class="submit" type="submit">sign in</button>
         <div class="signup-link">
           Don't have an account? <a href="signup.html">Sign up</a>
@@ -66,35 +66,35 @@
     <script>
       const url = "https://tawseel.circleteams.com";
       // const url = "http://tawseel.test";
-      
+
       // Function to clear error messages
       function clearErrors() {
-        const errorElements = document.querySelectorAll('.error-message');
-        errorElements.forEach(element => {
-          element.style.display = 'none';
-          element.textContent = '';
+        const errorElements = document.querySelectorAll(".error-message");
+        errorElements.forEach((element) => {
+          element.style.display = "none";
+          element.textContent = "";
         });
-        
-        document.getElementById('email-group').classList.remove('error');
-        document.getElementById('password-group').classList.remove('error');
+
+        document.getElementById("email-group").classList.remove("error");
+        document.getElementById("password-group").classList.remove("error");
       }
-      
+
       // Function to show error message
       function showError(fieldId, message) {
-        const errorElement = document.getElementById(fieldId + '-error');
-        const inputGroup = document.getElementById(fieldId + '-group');
-        
+        const errorElement = document.getElementById(fieldId + "-error");
+        const inputGroup = document.getElementById(fieldId + "-group");
+
         if (errorElement && inputGroup) {
           errorElement.textContent = message;
-          errorElement.style.display = 'block';
-          inputGroup.classList.add('error');
+          errorElement.style.display = "block";
+          inputGroup.classList.add("error");
         }
       }
-      
+
       async function handleSubmit(event) {
         event.preventDefault();
         clearErrors(); // Clear any previous errors
-        
+
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
@@ -118,26 +118,38 @@
           } else {
             // Handle different error status codes
             if (response.status === 401) {
-              showError('password', 'Incorrect password. Please try again.');
+              showError("password", "Incorrect password. Please try again.");
             } else if (response.status === 404) {
-              showError('email', 'Email not found. Please check your email address.');
+              showError(
+                "email",
+                "Email not found. Please check your email address."
+              );
             } else {
               // Try to get more specific error message from response
               try {
                 const errorData = await response.json();
                 if (errorData.message) {
-                  showError('password', errorData.message);
+                  showError("password", errorData.message);
                 } else {
-                  showError('password', 'Login failed. Please check your credentials.');
+                  showError(
+                    "password",
+                    "Login failed. Please check your credentials."
+                  );
                 }
               } catch (e) {
-                showError('password', 'Login failed. Please check your credentials.');
+                showError(
+                  "password",
+                  "Login failed. Please check your credentials."
+                );
               }
             }
           }
         } catch (error) {
           console.error("Error:", error);
-          showError('password', 'An error occurred during login. Please try again later.');
+          showError(
+            "password",
+            "An error occurred during login. Please try again later."
+          );
         }
       }
     </script>
