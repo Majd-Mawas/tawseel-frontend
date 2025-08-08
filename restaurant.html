@@ -31,7 +31,7 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
     />
-    
+
     <style>
       /* Pagination styles */
       .pagination {
@@ -40,7 +40,7 @@
         margin: 20px 0;
         gap: 5px;
       }
-      
+
       .pagination-btn {
         padding: 8px 12px;
         background-color: #f8f9fa;
@@ -49,17 +49,17 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      
+
       .pagination-btn:hover:not([disabled]) {
         background-color: #e9ecef;
       }
-      
+
       .pagination-btn.active {
         background-color: #007bff;
         color: white;
         border-color: #007bff;
       }
-      
+
       .pagination-btn:disabled {
         cursor: not-allowed;
         opacity: 0.5;
@@ -281,68 +281,79 @@
       // Setup pagination controls
       function setupPagination(meals) {
         const totalPages = Math.ceil(meals.length / itemsPerPage);
-        const paginationContainer = document.createElement('div');
-        paginationContainer.className = 'pagination';
-        
+        const paginationContainer = document.createElement("div");
+        paginationContainer.className = "pagination";
+
         // Create pagination HTML
-        let paginationHTML = '';
-        
+        let paginationHTML = "";
+
         // Previous button
-        paginationHTML += `<button class="pagination-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
-        
+        paginationHTML += `<button class="pagination-btn prev-btn" ${
+          currentPage === 1 ? "disabled" : ""
+        }>&laquo;</button>`;
+
         // Page buttons
         for (let i = 1; i <= totalPages; i++) {
-          paginationHTML += `<button class="pagination-btn page-btn ${currentPage === i ? 'active' : ''}" data-page="${i}">${i}</button>`;
+          paginationHTML += `<button class="pagination-btn page-btn ${
+            currentPage === i ? "active" : ""
+          }" data-page="${i}">${i}</button>`;
         }
-        
+
         // Next button
-        paginationHTML += `<button class="pagination-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
-        
+        paginationHTML += `<button class="pagination-btn next-btn" ${
+          currentPage === totalPages ? "disabled" : ""
+        }>&raquo;</button>`;
+
         paginationContainer.innerHTML = paginationHTML;
-        
+
         // Insert pagination after the cards container
-        const mainContainer = document.querySelector('.main');
+        const mainContainer = document.querySelector(".main");
         mainContainer.appendChild(paginationContainer);
-        
+
         // Add event listeners to pagination buttons
-        document.querySelectorAll('.page-btn').forEach(button => {
-          button.addEventListener('click', function() {
+        document.querySelectorAll(".page-btn").forEach((button) => {
+          button.addEventListener("click", function () {
             currentPage = parseInt(this.dataset.page);
             displayMeals(meals, currentPage);
             updatePaginationButtons(meals);
           });
         });
-        
-        document.querySelector('.prev-btn').addEventListener('click', function() {
-          if (currentPage > 1) {
-            currentPage--;
-            displayMeals(meals, currentPage);
-            updatePaginationButtons(meals);
-          }
-        });
-        
-        document.querySelector('.next-btn').addEventListener('click', function() {
-          if (currentPage < totalPages) {
-            currentPage++;
-            displayMeals(meals, currentPage);
-            updatePaginationButtons(meals);
-          }
-        });
+
+        document
+          .querySelector(".prev-btn")
+          .addEventListener("click", function () {
+            if (currentPage > 1) {
+              currentPage--;
+              displayMeals(meals, currentPage);
+              updatePaginationButtons(meals);
+            }
+          });
+
+        document
+          .querySelector(".next-btn")
+          .addEventListener("click", function () {
+            if (currentPage < totalPages) {
+              currentPage++;
+              displayMeals(meals, currentPage);
+              updatePaginationButtons(meals);
+            }
+          });
       }
 
       // Update pagination buttons active state
       function updatePaginationButtons(meals) {
         const totalPages = Math.ceil(meals.length / itemsPerPage);
-        
+
         // Update page buttons
-        document.querySelectorAll('.page-btn').forEach(button => {
+        document.querySelectorAll(".page-btn").forEach((button) => {
           const page = parseInt(button.dataset.page);
-          button.classList.toggle('active', page === currentPage);
+          button.classList.toggle("active", page === currentPage);
         });
-        
+
         // Update prev/next buttons
-        document.querySelector('.prev-btn').disabled = (currentPage === 1);
-        document.querySelector('.next-btn').disabled = (currentPage === totalPages);
+        document.querySelector(".prev-btn").disabled = currentPage === 1;
+        document.querySelector(".next-btn").disabled =
+          currentPage === totalPages;
       }
 
       // Modify filter buttons to work with pagination
@@ -376,16 +387,16 @@
             let filteredMeals = allMeals;
             if (category !== "all") {
               filteredMeals = allMeals.filter(
-                meal => meal.category.name.toLowerCase() === category
+                (meal) => meal.category.name.toLowerCase() === category
               );
             }
-            
+
             // Reset to first page when filtering
             currentPage = 1;
             displayMeals(filteredMeals, currentPage);
-            
+
             // Remove old pagination and create new one for filtered meals
-            const oldPagination = document.querySelector('.pagination');
+            const oldPagination = document.querySelector(".pagination");
             if (oldPagination) {
               oldPagination.remove();
             }

@@ -113,6 +113,17 @@
             if (DataResponse.data.token) {
               console.log("Response data:", DataResponse.data);
               localStorage.setItem("token", DataResponse.data.token);
+              
+              // Store user role if available
+              if (DataResponse.data.user && DataResponse.data.user.role) {
+                localStorage.setItem("userRole", DataResponse.data.user.role);
+                
+                // Redirect based on role
+                if (DataResponse.data.user.role === "driver") {
+                  window.location.href = "driver-dashboard.html";
+                  return;
+                }
+              }
             }
             window.location.href = "home.html";
           } else {
