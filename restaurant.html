@@ -220,7 +220,7 @@
               <img src="${
                 meal.media[0]?.original_url || "assets/images/default-meal.jpg"
               }" alt="${meal.name}" />
-              <span class="card_price"><span>S.P.</span>${meal.price}</span>
+              <span class="card_price"><span></span>${meal.price} S.P.</span>
             </div>
             <div class="card_content">
               <h2 class="card_title">${meal.name}</h2>
@@ -444,7 +444,7 @@
         <h2>Your Cart</h2>
         <div id="cartItems"></div>
         <div class="cart-total">
-          <h3>Total: S.P.<span id="cartTotalAmount">0.00</span></h3>
+          <h3>Total: <span id="cartTotalAmount">0.00</span> S.P.</h3>
           <button id="checkoutBtn" class="checkout-btn">Checkout</button>
         </div>
         <!-- Add map container -->
@@ -460,14 +460,12 @@
             "
           >
             <div>
-              <strong>Total Price:</strong> $<span id="orderTotalPrice"
-                >0.00</span
-              >
+              <strong>Total Price:</strong
+              ><span id="orderTotalPrice">0.00</span> S.P.
             </div>
             <div>
-              <strong>Delivery Fee:</strong> $<span id="orderDeliveryFee"
-                >0.00</span
-              >
+              <strong>Delivery Fee:</strong
+              ><span id="orderDeliveryFee">0.00</span> S.P.
             </div>
             <div>
               <strong>Estimated Delivery Time:</strong>
@@ -627,9 +625,9 @@
           }" class="cart-item-image">
               <div class="cart-item-details">
                 <h3>${item.name}</h3>
-                <p>S.P.${item.price} x ${item.quantity}</p>
+                <p>${item.price} x ${item.quantity} S.P.</p>
               </div>
-              <div class="cart-item-total">$${itemTotal.toFixed(2)}</div>
+              <div class="cart-item-total">${itemTotal.toFixed(2)} S.P.</div>
               <button class="remove-cart-item" data-id="${item.id}">
                 <span class="fa fa-trash"></span>
               </button>
@@ -689,8 +687,10 @@
                 const orderData = {
                   center_id: center,
                   items: items,
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
+                  // latitude: position.coords.latitude,
+                  // longitude: position.coords.longitude,
+                  latitude: 36.216667,
+                  longitude: 37.166668,
                 };
 
                 fetch(`${url}/api/checkout`, {
@@ -715,10 +715,10 @@
 
                     if (data.data) {
                       document.getElementById("orderTotalPrice").textContent = (
-                        (data.data.total_price || 0) / 100
+                        (data.data.total_price || 0)
                       ).toFixed(2);
                       document.getElementById("orderDeliveryFee").textContent =
-                        ((data.data.delivery_fee || 0) / 100).toFixed(2);
+                        (data.data.delivery_fee || 0).toFixed(2) * 1000;
                       document.getElementById("orderDeliveryTime").textContent =
                         data.data.delivery_time_estimate || "N/A";
                     }

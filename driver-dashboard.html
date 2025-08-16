@@ -462,13 +462,13 @@
                   </div>
                   <div class="order-detail">
                     <span>Total:</span>
-                    <span>$${((order.total_price || 0) / 100).toFixed(2)}</span>
+                    <span>${(order.total_price || 0).toFixed(2)} S.P.</span>
                   </div>
                   <div class="order-detail">
                     <span>Delivery Fee:</span>
-                    <span>$${((order.delivery_fee || 0) / 100).toFixed(
-                      2
-                    )}</span>
+                    <span>${
+                      (order.delivery_fee || 0).toFixed(2) * 1000
+                    } S.P. </span>
                   </div>
                   <div class="order-detail">
                     <span>Status:</span>
