@@ -630,8 +630,9 @@
 
       function initMap(position, order) {
         const driverLatLng = [
-          position.coords.latitude,
-          position.coords.longitude,
+          // position.coords.latitude ,
+          // position.coords.longitude,
+          36.20124, 37.16117,
         ];
         const restaurantLatLng = [
           parseFloat(order.restaurant.latitude),
@@ -708,7 +709,91 @@
 
         // Try to add routing, but don't fail if routing doesn't work
         try {
-          // Create a direct line between points instead of using the routing service
+          // Use Leaflet Routing Machine for proper road routing
+          // Driver to Restaurant route (blue)
+          const driverToRestaurantRoute = L.Routing.control({
+            waypoints: [
+              L.latLng(driverLatLng[0], driverLatLng[1]),
+              L.latLng(restaurantLatLng[0], restaurantLatLng[1]),
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            fitSelectedRoutes: false,
+            show: false, // Don't show the routing control panel
+            lineOptions: {
+              styles: [{ color: "#4285F4", opacity: 0.7, weight: 4 }],
+            },
+            createMarker: function () {
+              return null;
+            }, // Don't create default markers
+          }).addTo(mapInstance);
+
+          // Restaurant to Customer route (green)
+          const restaurantToCustomerRoute = L.Routing.control({
+            waypoints: [
+              L.latLng(restaurantLatLng[0], restaurantLatLng[1]),
+              L.latLng(customerLatLng[0], customerLatLng[1]),
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            fitSelectedRoutes: false,
+            show: false, // Don't show the routing control panel
+            lineOptions: {
+              styles: [
+                {
+                  color: "#0F9D58",
+                  opacity: 0.7,
+                  weight: 4,
+                  dashArray: "10, 10",
+                },
+              ],
+            },
+            createMarker: function () {
+              return null;
+            }, // Don't create default markers
+          }).addTo(mapInstance);
+
+          // Add distance labels when routes are calculated
+          driverToRestaurantRoute.on("routesfound", function (e) {
+            const routes = e.routes;
+            const summary = routes[0].summary;
+            const distance = summary.totalDistance / 1000; // Convert to km
+
+            const midpointDR = getMidpoint(driverLatLng, restaurantLatLng);
+
+            L.marker(midpointDR, {
+              icon: L.divIcon({
+                className: "distance-label",
+                html: `<div style="background-color:white; padding:3px; border-radius:3px; font-size:12px;">${distance.toFixed(
+                  1
+                )} km</div>`,
+                iconSize: [80, 20],
+                iconAnchor: [40, 10],
+              }),
+            }).addTo(mapInstance);
+          });
+
+          restaurantToCustomerRoute.on("routesfound", function (e) {
+            const routes = e.routes;
+            const summary = routes[0].summary;
+            const distance = summary.totalDistance / 1000; // Convert to km
+
+            const midpointRC = getMidpoint(restaurantLatLng, customerLatLng);
+
+            L.marker(midpointRC, {
+              icon: L.divIcon({
+                className: "distance-label",
+                html: `<div style="background-color:white; padding:3px; border-radius:3px; font-size:12px;">${distance.toFixed(
+                  1
+                )} km</div>`,
+                iconSize: [80, 20],
+                iconAnchor: [40, 10],
+              }),
+            }).addTo(mapInstance);
+          });
+        } catch (error) {
+          console.error("Error setting up routing:", error);
+          // If routing fails, fall back to direct lines
           // Driver to Restaurant (blue line)
           const driverToRestaurantLine = L.polyline(
             [driverLatLng, restaurantLatLng],
@@ -764,9 +849,6 @@
               iconAnchor: [40, 10],
             }),
           }).addTo(mapInstance);
-        } catch (error) {
-          console.error("Error setting up routing:", error);
-          // If routing fails completely, at least the markers are still shown
         }
 
         // Make sure the map is properly sized
