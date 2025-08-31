@@ -246,20 +246,22 @@
       </div>
 
       <div class="tabs">
-        <div class="tab active" data-tab="available-orders">
+        <!-- <div class="tab active" data-tab="available-orders">
           Available Orders
+        </div> -->
+        <div class="tab active" data-tab="assigned-orders">
+          My Assigned Orders
         </div>
-        <div class="tab" data-tab="assigned-orders">My Assigned Orders</div>
       </div>
 
-      <div class="tab-content active" id="available-orders">
+      <!-- <div class="tab-content active" id="available-orders">
         <div class="order-list" id="available-orders-list">
-          <!-- Available orders will be loaded here -->
+          Available orders will be loaded here
           <div class="no-orders">Loading available orders...</div>
         </div>
-      </div>
+      </div> -->
 
-      <div class="tab-content" id="assigned-orders">
+      <div class="tab-content active" id="assigned-orders">
         <div class="order-list" id="assigned-orders-list">
           <!-- Assigned orders will be loaded here -->
           <div class="no-orders">Loading your assigned orders...</div>
@@ -341,7 +343,7 @@
         }
 
         // Initialize the dashboard
-        loadAvailableOrders();
+        // loadAvailableOrders();
         loadAssignedOrders();
 
         // Set up tab switching
