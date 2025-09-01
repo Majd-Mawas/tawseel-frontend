@@ -186,6 +186,9 @@
             const data = await response.json();
             console.log(data);
 
+            // Update restaurant name in the header
+            document.getElementById("restaurantName").textContent = data.name || "Center Menu";
+
             allMeals = data.meals; // Store all meals
             displayMeals(allMeals, currentPage); // Display first page
             setupPagination(allMeals); // Setup pagination controls
@@ -471,6 +474,17 @@
               <strong>Estimated Delivery Time:</strong>
               <span id="orderDeliveryTime">0</span> minutes
             </div>
+            <!-- Added driver information section -->
+            <div id="driverInfo" style="display: none;">
+              <div>
+                <strong>Driver Name:</strong>
+                <span id="driverName">-</span>
+              </div>
+              <div>
+                <strong>Driver Phone:</strong>
+                <span id="driverPhone">-</span>
+              </div>
+            </div>
           </div>
           <div id="map" style="height: 300px; width: 100%"></div>
         </div>
@@ -710,6 +724,8 @@
                   })
                   .then((data) => {
                     console.log(data.data.restaurant);
+                    console.log(data.data);
+                    console.log(data.data.driver);
 
                     alert("Order placed successfully!");
 
@@ -721,6 +737,13 @@
                         (data.data.delivery_fee || 0).toFixed(2) * 1000;
                       document.getElementById("orderDeliveryTime").textContent =
                         data.data.delivery_time_estimate || "N/A";
+                      
+                      // Display driver information if available
+                      if (data.data.driver) {
+                        document.getElementById("driverInfo").style.display = "block";
+                        document.getElementById("driverName").textContent = data.data.driver.name || "-";
+                        document.getElementById("driverPhone").textContent = data.data.driver.phone || "-";
+                      }
                     }
                     if (
                       data.data.restaurant &&
