@@ -112,6 +112,15 @@
         justify-content: space-between;
         margin-bottom: 5px;
       }
+      
+      .status-cancelled {
+        color: #dc3545;
+        font-weight: bold;
+      }
+      
+      .order-card-cancelled {
+        border-left: 4px solid #dc3545;
+      }
 
       .order-actions {
         display: flex;
@@ -452,8 +461,10 @@
         let html = "";
 
         orders.forEach((order) => {
+          const isCancelled = order.status && order.status.toLowerCase() === "cancelled";
+          
           html += `
-              <div class="order-card" data-order-id="${order.id}">
+              <div class="order-card ${isCancelled ? 'order-card-cancelled' : ''}" data-order-id="${order.id}">
                 <h3>Order #${order.id}</h3>
                 <div class="order-details">
                   <div class="order-detail">
@@ -474,7 +485,7 @@
                   </div>
                   <div class="order-detail">
                     <span>Status:</span>
-                    <span>${order.status || "Pending"}</span>
+                    <span class="${isCancelled ? 'status-cancelled' : ''}">${order.status || "Pending"}</span>
                   </div>
                   <div class="order-detail">
                     <span>Created:</span>
@@ -504,8 +515,9 @@
                   ${
                     isAvailable
                       ? `<button class="btn btn-primary assign-btn" style="margin-inline:0.7rem;" data-order-id="${order.id}">Assign to Me</button>
-                         <button class="btn btn-success view-map-btn" data-order-id="${order.id}">View Map</button>`
-                      : `<button class="btn btn-success view-map-btn" data-order-id="${order.id}">View Map</button>`
+                         ${!isCancelled ? `<button class="btn btn-success view-map-btn" data-order-id="${order.id}">View Map</button>` : ''}`
+                      : `${!isCancelled ? `<button class="btn btn-success view-map-btn" data-order-id="${order.id}">View Map</button>` : 
+                          `<span class="status-cancelled"><i class="fa fa-ban"></i> Order Cancelled</span>`}`
                   }
                 </div>
               </div>
