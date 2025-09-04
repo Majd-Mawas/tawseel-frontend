@@ -33,6 +33,28 @@
     />
 
     <style>
+      /* Cancel Order Button Styles */
+      .cancel-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+      }
+      
+      .cancel-btn:hover {
+        background-color: #c82333;
+      }
+      
+      .cancel-btn.disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+      
       /* Pagination styles */
       .pagination {
         display: flex;
@@ -63,6 +85,130 @@
       .pagination-btn:disabled {
         cursor: not-allowed;
         opacity: 0.5;
+      }
+
+      /* Confirmation modal styles */
+      .confirm-modal-content {
+        max-width: 450px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .confirm-header {
+        color: #4caf50;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 24px;
+      }
+
+      .confirm-body {
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .confirm-icon {
+        font-size: 48px;
+        color: #4caf50;
+        margin-bottom: 15px;
+      }
+
+      .confirm-message {
+        margin-top: 15px;
+        font-size: 16px;
+        color: #333;
+      }
+
+      .confirm-summary {
+        margin-top: 15px;
+        text-align: left;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        padding: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-weight: bold;
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+      }
+
+      .confirm-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+
+      .cancel-confirm-btn {
+        padding: 10px 20px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        flex: 1;
+        margin-right: 10px;
+        transition: background-color 0.2s;
+      }
+
+      .cancel-confirm-btn:hover {
+        background-color: #d32f2f;
+      }
+
+      .confirm-order-btn {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        flex: 1;
+        margin-left: 10px;
+        transition: background-color 0.2s;
+      }
+
+      .confirm-order-btn:hover {
+        background-color: #388e3c;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+
+      .modal-fadeout {
+        animation: fadeOut 0.3s ease-out forwards;
       }
     </style>
     <script>
@@ -187,7 +333,8 @@
             console.log(data);
 
             // Update restaurant name in the header
-            document.getElementById("restaurantName").textContent = data.name || "Center Menu";
+            document.getElementById("restaurantName").textContent =
+              data.name || "Center Menu";
 
             allMeals = data.meals; // Store all meals
             displayMeals(allMeals, currentPage); // Display first page
@@ -475,7 +622,7 @@
               <span id="orderDeliveryTime">0</span> minutes
             </div>
             <!-- Added driver information section -->
-            <div id="driverInfo" style="display: none;">
+            <div id="driverInfo" style="display: none">
               <div>
                 <strong>Driver Name:</strong>
                 <span id="driverName">-</span>
@@ -485,11 +632,83 @@
                 <span id="driverPhone">-</span>
               </div>
             </div>
+            <!-- Add cancel order section -->
+            <div
+              id="cancelOrderSection"
+              style="display: none; margin-top: 10px"
+            >
+              <button id="cancelOrderBtn" class="cancel-btn">
+                Cancel Order
+              </button>
+              <div
+                id="cancelTimer"
+                style="font-size: 14px; color: #666; margin-top: 5px"
+              >
+                Time remaining: 5:00
+              </div>
+            </div>
           </div>
           <div id="map" style="height: 300px; width: 100%"></div>
         </div>
       </div>
     </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="confirmOrderModal" class="modal">
+      <div class="modal-content confirm-modal-content">
+        <span class="close-modal" id="closeConfirmModal">&times;</span>
+        <h2 class="confirm-header">Confirm Your Order</h2>
+        <div class="confirm-body">
+          <i class="fa fa-check-circle confirm-icon"></i>
+          <p class="confirm-message">
+            Are you sure you want to place this order?
+          </p>
+          <!-- <div id="confirmOrderSummary" class="confirm-summary"> -->
+          <!-- Order summary will be populated here -->
+          <!-- </div> -->
+        </div>
+        <div class="confirm-buttons">
+          <button id="cancelConfirmBtn" class="cancel-confirm-btn">
+            Cancel
+          </button>
+          <button id="confirmOrderBtn" class="confirm-order-btn">
+            Confirm Order
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Function to close modal with animation
+      function closeConfirmModal() {
+        const modal = document.getElementById("confirmOrderModal");
+        const modalContent = modal.querySelector(".modal-content");
+        modalContent.classList.add("modal-fadeout");
+
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+          modal.style.display = "none";
+          modalContent.classList.remove("modal-fadeout");
+        }, 300);
+      }
+
+      // Close confirmation modal when clicking the X
+      document
+        .getElementById("closeConfirmModal")
+        .addEventListener("click", closeConfirmModal);
+
+      // Close confirmation modal when clicking Cancel button
+      document
+        .getElementById("cancelConfirmBtn")
+        .addEventListener("click", closeConfirmModal);
+
+      // Close confirmation modal when clicking outside of it
+      window.addEventListener("click", function (event) {
+        if (event.target === document.getElementById("confirmOrderModal")) {
+          closeConfirmModal();
+        }
+      });
+    </script>
 
     <script>
       function calculateAStarPath(start, end, gridSize = 20) {
@@ -690,6 +909,45 @@
             return;
           }
 
+          // Show custom confirmation modal
+          document.getElementById("confirmOrderModal").style.display = "block";
+
+          // Populate order summary
+          //  const summaryContainer = document.getElementById("confirmOrderSummary");
+          //  summaryContainer.innerHTML = "";
+
+          //  // Add each item to the summary
+          //  let total = 0;
+          //  cart.forEach(item => {
+          //    const itemTotal = item.price * item.quantity;
+          //    total += itemTotal;
+
+          //    const itemElement = document.createElement("div");
+          //    itemElement.className = "summary-item";
+          //    itemElement.innerHTML = `
+          //      <span>${item.name} x ${item.quantity}</span>
+          //      <span>${itemTotal.toFixed(2)} S.P.</span>
+          //    `;
+          //    summaryContainer.appendChild(itemElement);
+          //  });
+
+          //  // Add total
+          //  const totalElement = document.createElement("div");
+          //  totalElement.className = "summary-total";
+          //  totalElement.innerHTML = `
+          //    <span>Total:</span>
+          //    <span>${total.toFixed(2)} S.P.</span>
+          //  `;
+          //  summaryContainer.appendChild(totalElement);
+        });
+
+      // Confirm order button event listener
+      document
+        .getElementById("confirmOrderBtn")
+        .addEventListener("click", function () {
+          // Hide confirmation modal with animation
+          closeConfirmModal();
+
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               function (position) {
@@ -701,10 +959,10 @@
                 const orderData = {
                   center_id: center,
                   items: items,
-                  // latitude: position.coords.latitude,
-                  // longitude: position.coords.longitude,
-                  latitude: 36.216667,
-                  longitude: 37.166668,
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  // latitude: 36.216667,
+                  // longitude: 37.166668,
                 };
 
                 fetch(`${url}/api/checkout`, {
@@ -731,20 +989,35 @@
 
                     if (data.data) {
                       document.getElementById("orderTotalPrice").textContent = (
-                        (data.data.total_price || 0)
+                        data.data.total_price || 0
                       ).toFixed(2);
                       document.getElementById("orderDeliveryFee").textContent =
                         (data.data.delivery_fee || 0).toFixed(2) * 1000;
                       document.getElementById("orderDeliveryTime").textContent =
                         data.data.delivery_time_estimate || "N/A";
-                      
+
                       // Display driver information if available
                       if (data.data.driver) {
-                        document.getElementById("driverInfo").style.display = "block";
-                        document.getElementById("driverName").textContent = data.data.driver.name || "-";
-                        document.getElementById("driverPhone").textContent = data.data.driver.phone || "-";
+                        document.getElementById("driverInfo").style.display =
+                          "block";
+                        document.getElementById("driverName").textContent =
+                          data.data.driver.name || "-";
+                        document.getElementById("driverPhone").textContent =
+                          data.data.driver.phone || "-";
                       }
+                      
+                      // Show cancel order section and start the timer
+                      const cancelOrderSection = document.getElementById("cancelOrderSection");
+                      cancelOrderSection.style.display = "block";
+                      
+                      // Store the order ID for cancellation
+                      const orderId = data.data.id;
+                      document.getElementById("cancelOrderBtn").dataset.orderId = orderId;
+                      
+                      // Start the 5-minute countdown
+                      startCancelOrderTimer();
                     }
+                    
                     if (
                       data.data.restaurant &&
                       data.data.restaurant.latitude &&
@@ -825,6 +1098,91 @@
             );
           }
         });
+        
+        // Function to handle the 5-minute countdown for order cancellation
+        function startCancelOrderTimer() {
+          const cancelTimerElement = document.getElementById("cancelTimer");
+          const cancelButton = document.getElementById("cancelOrderBtn");
+          
+          // Set initial time (5 minutes in seconds)
+          let timeLeft = 5 * 60;
+          
+          // Update the timer display immediately
+          updateTimerDisplay();
+          
+          // Set up the interval to update every second
+          const timerInterval = setInterval(function() {
+            timeLeft--;
+            
+            // Update the display
+            updateTimerDisplay();
+            
+            // Check if time is up
+            if (timeLeft <= 0) {
+              clearInterval(timerInterval);
+              cancelButton.disabled = true;
+              cancelButton.classList.add("disabled");
+              cancelTimerElement.textContent = "Time expired. You can no longer cancel this order.";
+            }
+          }, 1000);
+          
+          // Function to format and display the time
+          function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            cancelTimerElement.textContent = `Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+          }
+          
+          // Add event listener for cancel button
+          cancelButton.addEventListener("click", function() {
+            const orderId = this.dataset.orderId;
+            
+            if (!orderId) {
+              alert("Order ID not found. Cannot cancel order.");
+              return;
+            }
+            
+            if (confirm("Are you sure you want to cancel this order?")) {
+              // Disable the button while processing
+              cancelButton.disabled = true;
+              
+              // Call the API to cancel the order
+              fetch(`${url}/api/orders/${orderId}/cancel`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+              })
+              .then(response => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error("Failed to cancel order");
+              })
+              .then(data => {
+                 alert("Order cancelled successfully!");
+                 // Clear the timer
+                 clearInterval(timerInterval);
+                 // Hide the map container
+                 document.getElementById("mapContainer").style.display = "none";
+                 // Clear cart items display in the modal
+                 const cartItemsContainer = document.getElementById("cartItems");
+                 cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+                 document.getElementById("cartTotalAmount").textContent = "0.00";
+                 // Reset cart count display
+                 document.getElementById("cartCount").textContent = "0";
+               })
+              .catch(error => {
+                console.error("Error cancelling order:", error);
+                alert("Failed to cancel order. Please try again.");
+                // Re-enable the button if there was an error
+                cancelButton.disabled = false;
+              });
+            }
+          });
+        }
     </script>
   </body>
 </html>

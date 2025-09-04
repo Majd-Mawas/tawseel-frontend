@@ -632,9 +632,9 @@
 
       function initMap(position, order) {
         const driverLatLng = [
-          // position.coords.latitude ,
-          // position.coords.longitude,
-          36.20124, 37.16117,
+          position.coords.latitude,
+          position.coords.longitude,
+          // 36.20124, 37.16117,
         ];
         const restaurantLatLng = [
           parseFloat(order.restaurant.latitude),
